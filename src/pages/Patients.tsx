@@ -38,13 +38,40 @@ const Patients = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name.trim()) { toast.error('Nome é obrigatório'); return; }
+
+    const treatment = getTreatmentValue();
+
+    if (!form.name.trim()) {
+      toast.error('Nome é obrigatório');
+      return;
+    }
+
+    if (!form.phone.trim()) {
+      toast.error('Telefone é obrigatório');
+      return;
+    }
+
+    if (!treatment) {
+      toast.error('Tratamento é obrigatório');
+      return;
+    }
+
+    const payload = {
+      name: sanitizeUpperName(form.name).trim(),
+      phone: sanitizePhone(form.phone),
+      email: '',
+      cpf: form.cpf,
+      birthDate: form.birthDate,
+      address: '',
+      notes: sanitizeUpperText(treatment),
+    };
+
     try {
       if (editingId) {
-        await updatePatient(editingId, form);
+        await updatePatient(editingId, payload);
         toast.success('Paciente atualizado!');
       } else {
-        await addPatient(form);
+        await addPatient(payload);
         toast.success('Paciente cadastrado!');
       }
       setForm(emptyForm);
@@ -192,15 +219,6 @@ const Patients = () => {
       {loading ? (
         <div className="text-center py-16 text-muted-foreground">Carregando pacientes...</div>
       ) : (
-      <>
-      {/* Card Grid */}
-      {filtered.length === 0 ? (
-        <div className="text-center py-16 text-muted-foreground">
-          <UserPlus className="w-12 h-12 mx-auto mb-4 opacity-40" />
-          <p className="text-lg">Nenhum paciente encontrado</p>
-          <p className="text-sm mt-1">Clique em "Novo Paciente" para cadastrar</p>
-        </div>
-      ) : (
         <>
           {filtered.length === 0 ? (
             <div className="text-center py-16 text-muted-foreground">
@@ -240,9 +258,6 @@ const Patients = () => {
             </div>
           )}
         </>
-      )}
-
-      </>
       )}
 
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>

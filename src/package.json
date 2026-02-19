@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "api": "node ../server.js"
+    "api": "node ../server.js",
+    "up": "node ../scripts/up.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

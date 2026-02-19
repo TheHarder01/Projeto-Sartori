@@ -183,10 +183,11 @@ const server = http.createServer(async (req, res) => {
     try {
       const body = await getBody(req);
       if (!body.name || !String(body.name).trim()) return jsonResponse(res, 400, { error: 'Nome é obrigatório' });
+      if (!body.phone || !String(body.phone).trim()) return jsonResponse(res, 400, { error: 'Telefone é obrigatório' });
       const all = readJson(files.patients, []);
       const patient = {
         id: uid(),
-        name: String(body.name || ''),
+        name: String(body.name || '').toUpperCase(),
         phone: String(body.phone || ''),
         email: String(body.email || ''),
         cpf: String(body.cpf || ''),
@@ -211,6 +212,8 @@ const server = http.createServer(async (req, res) => {
       const all = readJson(files.patients, []);
       const idx = all.findIndex((p) => p.id === id);
       if (idx < 0) return jsonResponse(res, 404, { error: 'Paciente não encontrado' });
+      if (body.name !== undefined) body.name = String(body.name).toUpperCase();
+      if (body.phone !== undefined && !String(body.phone).trim()) return jsonResponse(res, 400, { error: 'Telefone é obrigatório' });
       all[idx] = { ...all[idx], ...body, id: all[idx].id, createdAt: all[idx].createdAt };
       writeJson(files.patients, all);
       return jsonResponse(res, 200, all[idx]);
