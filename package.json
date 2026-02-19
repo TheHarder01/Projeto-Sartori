@@ -7,7 +7,6 @@
     "dev": "npm --prefix src run dev -- --host 0.0.0.0 --port 8080",
     "build": "npm --prefix src run build",
     "test": "npm --prefix src run test",
-    "api": "node server.js",
-    "up": "bash -lc 'npm run api & API_PID=$!; trap \"kill $API_PID 2>/dev/null\" EXIT INT TERM; npm run dev'"
+    "api": "node server.js"
   }
 }
