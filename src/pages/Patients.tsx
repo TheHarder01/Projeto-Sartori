@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 const emptyForm = { name: '', phone: '', email: '', cpf: '', birthDate: '', address: '', notes: '' };
 
 const Patients = () => {
-  const { patients, addPatient, updatePatient, deletePatient, referrals } = useClinic();
+  const { patients, addPatient, updatePatient, deletePatient, referrals, loading } = useClinic();
   const [search, setSearch] = useState('');
   const [formOpen, setFormOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
@@ -25,19 +25,23 @@ const Patients = () => {
     p.notes.toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name.trim()) { toast.error('Nome é obrigatório'); return; }
-    if (editingId) {
-      updatePatient(editingId, form);
-      toast.success('Paciente atualizado!');
-    } else {
-      addPatient(form);
-      toast.success('Paciente cadastrado!');
+    try {
+      if (editingId) {
+        await updatePatient(editingId, form);
+        toast.success('Paciente atualizado!');
+      } else {
+        await addPatient(form);
+        toast.success('Paciente cadastrado!');
+      }
+      setForm(emptyForm);
+      setEditingId(null);
+      setFormOpen(false);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Erro ao salvar paciente');
     }
-    setForm(emptyForm);
-    setEditingId(null);
-    setFormOpen(false);
   };
 
   const openEdit = (p: Patient) => {
@@ -46,9 +50,13 @@ const Patients = () => {
     setFormOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    deletePatient(id);
-    toast.success('Paciente removido!');
+  const handleDelete = async (id: string) => {
+    try {
+      await deletePatient(id);
+      toast.success('Paciente removido!');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Erro ao remover paciente');
+    }
   };
 
   const openDetail = (p: Patient) => {
@@ -105,6 +113,10 @@ const Patients = () => {
         />
       </div>
 
+      {loading ? (
+        <div className="text-center py-16 text-muted-foreground">Carregando pacientes...</div>
+      ) : (
+      <>
       {/* Card Grid */}
       {filtered.length === 0 ? (
         <div className="text-center py-16 text-muted-foreground">
@@ -160,6 +172,9 @@ const Patients = () => {
             </div>
           ))}
         </div>
+      )}
+
+      </>
       )}
 
       {/* Detail Dialog */}

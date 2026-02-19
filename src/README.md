@@ -71,3 +71,26 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+
+
+## Execução local em rede (Windows/Linux)
+
+1. API local (salva JSON na pasta Downloads do usuário do sistema):
+
+```sh
+cd src
+npm run api
+```
+
+2. Frontend:
+
+```sh
+cd src
+npm run dev -- --host 0.0.0.0 --port 8080
+```
+
+Arquivos gerados automaticamente em `~/Downloads/SartoriOdontoDados`:
+- `pacientes.json`
+- `indicacoes.json`
+- `ranking_mensal.json`
+- `ranking_all.json`
