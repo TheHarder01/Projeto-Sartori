@@ -21,7 +21,7 @@ const statusColors: Record<ReferralStatus, string> = {
 };
 
 const Referrals = () => {
-  const { patients, referrals, addReferral, updateReferralStatus, deleteReferral } = useClinic();
+  const { patients, referrals, addReferral, updateReferralStatus, deleteReferral, loading } = useClinic();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [formOpen, setFormOpen] = useState(false);
@@ -33,13 +33,17 @@ const Referrals = () => {
     return matchSearch && matchStatus;
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.referrerId || !form.referredName.trim()) { toast.error('Indicador e nome do indicado são obrigatórios'); return; }
-    addReferral({ ...form, status: 'indicado' });
-    toast.success('Indicação registrada!');
-    setForm({ referrerId: '', referredName: '', referredPhone: '', referredEmail: '', treatmentInterest: '', notes: '' });
-    setFormOpen(false);
+    try {
+      await addReferral({ ...form, status: 'indicado' });
+      toast.success('Indicação registrada!');
+      setForm({ referrerId: '', referredName: '', referredPhone: '', referredEmail: '', treatmentInterest: '', notes: '' });
+      setFormOpen(false);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Erro ao registrar indicação');
+    }
   };
 
   const getPatientName = (id: string) => patients.find(p => p.id === id)?.name ?? 'Desconhecido';
@@ -107,7 +111,10 @@ const Referrals = () => {
         </Select>
       </div>
 
-      <Card className="border-border">
+      {loading ? (
+        <div className="text-center py-10 text-muted-foreground">Carregando indicações...</div>
+      ) : (
+        <Card className="border-border">
         <CardContent className="p-0">
           <Table>
             <TableHeader>
@@ -128,7 +135,7 @@ const Referrals = () => {
                   <TableCell className="hidden sm:table-cell">{getPatientName(r.referrerId)}</TableCell>
                   <TableCell className="hidden md:table-cell">{r.treatmentInterest || '-'}</TableCell>
                   <TableCell>
-                    <Select value={r.status} onValueChange={(v) => { updateReferralStatus(r.id, v as ReferralStatus); toast.success('Status atualizado!'); }}>
+                    <Select value={r.status} onValueChange={async (v) => { try { await updateReferralStatus(r.id, v as ReferralStatus); toast.success('Status atualizado!'); } catch (error) { toast.error(error instanceof Error ? error.message : 'Erro ao atualizar status'); } }}>
                       <SelectTrigger className="w-32 h-8">
                         <Badge variant="outline" className={`${statusColors[r.status]} border`}>{statusLabels[r.status]}</Badge>
                       </SelectTrigger>
@@ -140,7 +147,7 @@ const Referrals = () => {
                     </Select>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="icon" onClick={() => { deleteReferral(r.id); toast.success('Indicação removida!'); }} className="text-destructive hover:text-destructive">
+                    <Button variant="ghost" size="icon" onClick={async () => { try { await deleteReferral(r.id); toast.success('Indicação removida!'); } catch (error) { toast.error(error instanceof Error ? error.message : 'Erro ao remover indicação'); } }} className="text-destructive hover:text-destructive">
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </TableCell>
@@ -149,7 +156,8 @@ const Referrals = () => {
             </TableBody>
           </Table>
         </CardContent>
-      </Card>
+        </Card>
+      )}
     </div>
   );
 };
