@@ -71,3 +71,74 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+
+
+## Execução local em rede (Windows/Linux)
+
+1. API local (salva JSON na pasta Downloads do usuário do sistema):
+
+```sh
+cd src
+npm run api
+```
+
+2. Frontend:
+
+```sh
+cd src
+npm run dev -- --host 0.0.0.0 --port 8080
+```
+
+Arquivos gerados automaticamente em `~/Downloads/SartoriOdontoDados`:
+- `pacientes.json`
+- `indicacoes.json`
+- `ranking_mensal.json`
+- `ranking_all.json`
+
+
+## Rodando no GitHub Codespaces (corrige erro ENOENT package.json)
+
+No Codespaces, rode os comandos na raiz do repositório (`/workspaces/Projeto-Sartori`), **não** em `/workspace/...`.
+
+```sh
+cd /workspaces/Projeto-Sartori
+npm run install:app
+```
+
+Suba API (JSON em Downloads) em um terminal:
+
+```sh
+npm run api
+```
+
+Suba frontend em outro terminal:
+
+```sh
+npm run dev
+```
+
+### Rodar tudo com um único comando
+
+Na raiz do projeto, execute:
+
+```sh
+npm run up
+```
+
+Esse comando sobe **API (7070)** e **Frontend (8080)** juntos no mesmo terminal.
+
+> Se a porta 8080 já estiver em uso, o Vite agora **falha explicitamente** (não troca para 8081 automaticamente). Isso evita confusão no encaminhamento de portas do Codespaces.
+
+### Acesso no Codespaces
+
+No Codespaces, abra as URLs da aba **PORTS** (não use `localhost` no navegador da sua máquina):
+
+- Frontend: `https://<codespace>-8080.app.github.dev`
+- API: `https://<codespace>-7070.app.github.dev`
+
+Se quiser validar API rapidamente:
+
+```sh
+curl -s http://127.0.0.1:7070/api/health
+curl -s http://127.0.0.1:7070/api/pacientes
+```
