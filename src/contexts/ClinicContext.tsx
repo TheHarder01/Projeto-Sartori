@@ -1,65 +1,90 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Patient, Referral, ReferralStatus } from '@/types/clinic';
+import { api } from '@/lib/api';
 
 interface ClinicContextType {
   patients: Patient[];
   referrals: Referral[];
-  addPatient: (patient: Omit<Patient, 'id' | 'createdAt'>) => void;
-  updatePatient: (id: string, data: Partial<Patient>) => void;
-  deletePatient: (id: string) => void;
-  addReferral: (referral: Omit<Referral, 'id' | 'createdAt' | 'updatedAt'>) => void;
-  updateReferralStatus: (id: string, status: ReferralStatus) => void;
-  deleteReferral: (id: string) => void;
+  loading: boolean;
+  addPatient: (patient: Omit<Patient, 'id' | 'createdAt'>) => Promise<void>;
+  updatePatient: (id: string, data: Partial<Patient>) => Promise<void>;
+  deletePatient: (id: string) => Promise<void>;
+  addReferral: (referral: Omit<Referral, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  updateReferralStatus: (id: string, status: ReferralStatus) => Promise<void>;
+  deleteReferral: (id: string) => Promise<void>;
+  refreshAll: () => Promise<void>;
 }
 
 const ClinicContext = createContext<ClinicContextType | null>(null);
 
-const loadFromStorage = <T,>(key: string, fallback: T): T => {
-  try {
-    const data = localStorage.getItem(key);
-    return data ? JSON.parse(data) : fallback;
-  } catch {
-    return fallback;
-  }
-};
-
 export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [patients, setPatients] = useState<Patient[]>(() => loadFromStorage('clinic_patients', []));
-  const [referrals, setReferrals] = useState<Referral[]>(() => loadFromStorage('clinic_referrals', []));
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [referrals, setReferrals] = useState<Referral[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => { localStorage.setItem('clinic_patients', JSON.stringify(patients)); }, [patients]);
-  useEffect(() => { localStorage.setItem('clinic_referrals', JSON.stringify(referrals)); }, [referrals]);
-
-  const addPatient = useCallback((data: Omit<Patient, 'id' | 'createdAt'>) => {
-    const patient: Patient = { ...data, id: crypto.randomUUID(), createdAt: new Date().toISOString() };
-    setPatients(prev => [...prev, patient]);
+  const refreshAll = useCallback(async () => {
+    const [patientsData, referralsData] = await Promise.all([api.getPatients(), api.getReferrals()]);
+    setPatients(patientsData);
+    setReferrals(referralsData);
   }, []);
 
-  const updatePatient = useCallback((id: string, data: Partial<Patient>) => {
-    setPatients(prev => prev.map(p => p.id === id ? { ...p, ...data } : p));
+  useEffect(() => {
+    const load = async () => {
+      try {
+        await refreshAll();
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, [refreshAll]);
+
+  const addPatient = useCallback(async (data: Omit<Patient, 'id' | 'createdAt'>) => {
+    const created = await api.createPatient(data);
+    setPatients((prev) => [...prev, created]);
   }, []);
 
-  const deletePatient = useCallback((id: string) => {
-    setPatients(prev => prev.filter(p => p.id !== id));
-    setReferrals(prev => prev.filter(r => r.referrerId !== id));
+  const updatePatient = useCallback(async (id: string, data: Partial<Patient>) => {
+    const updated = await api.updatePatient(id, data);
+    setPatients((prev) => prev.map((p) => (p.id === id ? updated : p)));
   }, []);
 
-  const addReferral = useCallback((data: Omit<Referral, 'id' | 'createdAt' | 'updatedAt'>) => {
-    const now = new Date().toISOString();
-    const referral: Referral = { ...data, id: crypto.randomUUID(), createdAt: now, updatedAt: now };
-    setReferrals(prev => [...prev, referral]);
+  const deletePatient = useCallback(async (id: string) => {
+    await api.deletePatient(id);
+    setPatients((prev) => prev.filter((p) => p.id !== id));
+    setReferrals((prev) => prev.filter((r) => r.referrerId !== id));
   }, []);
 
-  const updateReferralStatus = useCallback((id: string, status: ReferralStatus) => {
-    setReferrals(prev => prev.map(r => r.id === id ? { ...r, status, updatedAt: new Date().toISOString() } : r));
+  const addReferral = useCallback(async (data: Omit<Referral, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const created = await api.createReferral(data);
+    setReferrals((prev) => [...prev, created]);
   }, []);
 
-  const deleteReferral = useCallback((id: string) => {
-    setReferrals(prev => prev.filter(r => r.id !== id));
+  const updateReferralStatus = useCallback(async (id: string, status: ReferralStatus) => {
+    const updated = await api.updateReferralStatus(id, status);
+    setReferrals((prev) => prev.map((r) => (r.id === id ? updated : r)));
+  }, []);
+
+  const deleteReferral = useCallback(async (id: string) => {
+    await api.deleteReferral(id);
+    setReferrals((prev) => prev.filter((r) => r.id !== id));
   }, []);
 
   return (
-    <ClinicContext.Provider value={{ patients, referrals, addPatient, updatePatient, deletePatient, addReferral, updateReferralStatus, deleteReferral }}>
+    <ClinicContext.Provider
+      value={{
+        patients,
+        referrals,
+        loading,
+        addPatient,
+        updatePatient,
+        deletePatient,
+        addReferral,
+        updateReferralStatus,
+        deleteReferral,
+        refreshAll,
+      }}
+    >
       {children}
     </ClinicContext.Provider>
   );
