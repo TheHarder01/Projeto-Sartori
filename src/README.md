@@ -127,6 +127,14 @@ npm run up
 
 Esse comando sobe **API (7070)** e **Frontend (8080)** juntos no mesmo terminal.
 
+> Se a porta 8080 já estiver em uso, o Vite agora **falha explicitamente** (não troca para 8081 automaticamente). Isso evita confusão no encaminhamento de portas do Codespaces.
+
+### Acesso no Codespaces
+
+No Codespaces, abra as URLs da aba **PORTS** (não use `localhost` no navegador da sua máquina):
+
+- Frontend: `https://<codespace>-8080.app.github.dev`
+- API: `https://<codespace>-7070.app.github.dev`
 
 Se quiser validar API rapidamente:
 

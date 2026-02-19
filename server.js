@@ -166,6 +166,21 @@ const server = http.createServer(async (req, res) => {
     return jsonResponse(res, 200, { ok: true });
   }
 
+
+  if (url.pathname === '/' && req.method === 'GET') {
+    return jsonResponse(res, 200, {
+      ok: true,
+      message: 'API Sartori online',
+      endpoints: [
+        '/api/health',
+        '/api/pacientes',
+        '/api/indicacoes',
+        '/api/ranking/all',
+        '/api/ranking/mensal',
+      ],
+    });
+  }
+
   if (url.pathname === '/api/health' && req.method === 'GET') {
     return jsonResponse(res, 200, {
       ok: true,

@@ -4,6 +4,19 @@ const { spawn } = require('node:child_process');
 const isWin = process.platform === 'win32';
 const npmCmd = isWin ? 'npm.cmd' : 'npm';
 
+
+function printCodespacesHints() {
+  const name = process.env.CODESPACE_NAME;
+  if (!name) return;
+
+  console.log('[up] GitHub Codespaces detectado. Abra pelas URLs encaminhadas:');
+  console.log(`[up] Frontend: https://${name}-8080.app.github.dev`);
+  console.log(`[up] API:      https://${name}-7070.app.github.dev`);
+  console.log('[up] Evite localhost no navegador da sua máquina local.');
+}
+
+printCodespacesHints();
+
 function run(name, args, options = {}) {
   const child = spawn(npmCmd, args, {
     stdio: 'inherit',
