@@ -1,0 +1,13 @@
+{
+  "name": "projeto-sartori-root",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "install:app": "npm --prefix src install",
+    "dev": "npm --prefix src run dev -- --host 0.0.0.0 --port 8080",
+    "build": "npm --prefix src run build",
+    "test": "npm --prefix src run test",
+    "api": "node server.js",
+    "up": "node scripts/up.js"
+  }
+}

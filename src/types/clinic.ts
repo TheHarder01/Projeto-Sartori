@@ -26,22 +26,22 @@ export interface Referral {
 }
 
 export const TREATMENTS = [
-  'Limpeza',
-  'Clareamento',
-  'Restauração',
-  'Extração',
-  'Canal',
-  'Implante',
-  'Prótese Fixa',
-  'Prótese Removível',
-  'Ortodontia',
-  'Invisalign',
-  'Facetas',
-  'Lentes de Contato Dental',
-  'Cirurgia Oral',
-  'Periodontia',
-  'Endodontia',
-  'Harmonização Orofacial',
+  'LIMPEZA / PROFILAXIA',
+  'CLAREAMENTO DENTAL',
+  'RESTAURAÇÃO',
+  'EXTRAÇÃO',
+  'CANAL',
+  'IMPLANTE DENTÁRIO',
+  'PRÓTESE FIXA',
+  'PRÓTESE REMOVÍVEL',
+  'ORTODONTIA (APARELHO)',
+  'INVISALIGN',
+  'FACETAS DE PORCELANA',
+  'LENTES DE CONTATO DENTAL',
+  'CIRURGIA ORAL',
+  'PERIODONTIA',
+  'ENDODONTIA',
+  'HARMONIZAÇÃO OROFACIAL',
 ] as const;
 
 export interface PatientScore {
