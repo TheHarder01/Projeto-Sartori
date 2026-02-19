@@ -245,7 +245,6 @@ const Patients = () => {
       </>
       )}
 
-      {/* Detail Dialog */}
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
