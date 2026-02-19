@@ -1,12 +1,6 @@
 import { Patient, Referral, ReferralStatus } from '@/types/clinic';
 
-const browserOverride = (window as any).__SARTORI_API__ as string | undefined;
-const envOverride = import.meta.env.VITE_API_BASE as string | undefined;
-const runtimeHost = window.location.hostname || 'localhost';
-const runtimeProtocol = window.location.protocol === 'https:' ? 'https' : 'http';
-const runtimeBase = `${runtimeProtocol}://${runtimeHost}:7070`;
-
-const API_BASE = browserOverride || envOverride || runtimeBase;
+const API_BASE = (window as any).__SARTORI_API__ || 'http://localhost:7070';
 
 async function req<T>(url: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE}${url}`, {
