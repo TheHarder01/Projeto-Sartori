@@ -1,34 +1,49 @@
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
+import { useClinic } from '@/contexts/ClinicContext';
 import { PatientScore } from '@/types/clinic';
-import { api } from '@/lib/api';
 
 export const useScores = (month?: number, year?: number): PatientScore[] => {
-  const [scores, setScores] = useState<PatientScore[]>([]);
+  const { patients, referrals } = useClinic();
 
-  useEffect(() => {
-    let active = true;
+  return useMemo(() => {
+    const scoreMap = new Map<string, PatientScore>();
 
-    const load = async () => {
-      try {
-        if (month === undefined || year === undefined) {
-          const payload = await api.getRankingAll();
-          if (active) setScores(payload.data as PatientScore[]);
-          return;
-        }
+    patients.forEach((patient) => {
+      scoreMap.set(patient.id, {
+        patientId: patient.id,
+        patientName: patient.name,
+        totalReferrals: 0,
+        attended: 0,
+        converted: 0,
+        points: 0,
+      });
+    });
 
-        const payload = await api.getRankingMonthly(month, year);
-        if (active) setScores(payload.data as PatientScore[]);
-      } catch {
-        if (active) setScores([]);
+    const filteredReferrals = referrals.filter((referral) => {
+      if (month === undefined || year === undefined) return true;
+      const date = new Date(referral.createdAt);
+      return date.getMonth() === month && date.getFullYear() === year;
+    });
+
+    filteredReferrals.forEach((referral) => {
+      const score = scoreMap.get(referral.referrerId);
+      if (!score) return;
+
+      score.totalReferrals += 1;
+
+      if (referral.status === 'atendido') {
+        score.attended += 1;
+        score.points += 1;
       }
-    };
 
-    load();
+      if (referral.status === 'fechado') {
+        score.converted += 1;
+        score.points += 31;
+      }
+    });
 
-    return () => {
-      active = false;
-    };
-  }, [month, year]);
-
-  return scores;
+    return Array.from(scoreMap.values())
+      .filter((score) => score.totalReferrals > 0)
+      .sort((a, b) => b.points - a.points || b.converted - a.converted || b.attended - a.attended || b.totalReferrals - a.totalReferrals || a.patientName.localeCompare(b.patientName));
+  }, [patients, referrals, month, year]);
 };
