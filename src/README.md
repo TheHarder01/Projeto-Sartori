@@ -73,70 +73,87 @@ To connect a domain, navigate to Project > Settings > Domains and click Connect 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
 
 
-## Execução local em rede (Windows/Linux)
+## Como executar em qualquer computador (Windows/Linux/macOS)
 
-1. API local (salva JSON na pasta Downloads do usuário do sistema):
+> Objetivo: subir API + Frontend com um único comando e acessar tudo funcionando com persistência dos dados em JSON.
 
-```sh
-cd src
-npm run api
-```
+### 1) Pré-requisitos
 
-2. Frontend:
+- Node.js 20+ (recomendado 22)
+- npm 10+
+- Git (opcional, se for clonar)
 
-```sh
-cd src
-npm run dev -- --host 0.0.0.0 --port 8080
-```
+### 2) Baixar o projeto e instalar dependências
 
-Arquivos gerados automaticamente em `~/Downloads/SartoriOdontoDados`:
-- `pacientes.json`
-- `indicacoes.json`
-- `ranking_mensal.json`
-- `ranking_all.json`
-
-
-## Rodando no GitHub Codespaces (corrige erro ENOENT package.json)
-
-No Codespaces, rode os comandos na raiz do repositório (`/workspaces/Projeto-Sartori`), **não** em `/workspace/...`.
+Na **raiz** do projeto (`Projeto-Sartori`):
 
 ```sh
-cd /workspaces/Projeto-Sartori
+git clone <URL_DO_REPOSITORIO>
+cd Projeto-Sartori
 npm run install:app
 ```
 
-Suba API (JSON em Downloads) em um terminal:
+### 3) Subir tudo (API + Frontend)
 
-```sh
-npm run api
-```
-
-Suba frontend em outro terminal:
-
-```sh
-npm run dev
-```
-
-### Rodar tudo com um único comando
-
-Na raiz do projeto, execute:
+Ainda na raiz:
 
 ```sh
 npm run up
 ```
 
-Esse comando sobe **API (7070)** e **Frontend (8080)** juntos no mesmo terminal.
+Esse comando:
+- sobe a API em `0.0.0.0:7070`
+- sobe o Frontend em `0.0.0.0:8080`
+- reinicia processos antigos automaticamente se já houver algo travado nessas portas.
 
-> Se a porta 8080 já estiver em uso, o Vite agora **falha explicitamente** (não troca para 8081 automaticamente). Isso evita confusão no encaminhamento de portas do Codespaces.
+### 4) Acessar o sistema
+
+- Frontend (uso normal): `http://SEU_IP:8080`
+- API Health (teste): `http://SEU_IP:7070/api/health`
+
+Exemplo em rede local:
+- `http://192.168.5.99:8080`
+- `http://192.168.5.99:7070/api/health`
+
+> Dica: no terminal do `npm run up`, o servidor mostra os IPs disponíveis da máquina.
+
+### 5) Onde os dados ficam salvos
+
+Os dados são salvos automaticamente em JSON dentro de:
+
+`~/Downloads/SartoriOdontoDados`
+
+Arquivos gerados:
+- `pacientes.json`
+- `indicacoes.json`
+- `ranking_mensal.json`
+- `ranking_all.json`
+
+### 6) Se não abrir em outro computador da rede
+
+- Verifique firewall liberando portas **7070** e **8080**.
+- Garanta que ambos os computadores estão na mesma rede.
+- Não use `localhost` no computador cliente; use o **IP da máquina servidor**.
+
+## Rodando no GitHub Codespaces
+
+No Codespaces, rode os comandos na raiz do repositório (`/workspaces/Projeto-Sartori`).
+
+```sh
+cd /workspaces/Projeto-Sartori
+npm run install:app
+npm run up
+```
 
 ### Acesso no Codespaces
 
-No Codespaces, abra as URLs da aba **PORTS** (não use `localhost` no navegador da sua máquina):
+Abra as URLs da aba **PORTS**:
 
 - Frontend: `https://<codespace>-8080.app.github.dev`
 - API: `https://<codespace>-7070.app.github.dev`
+- API Health: `https://<codespace>-7070.app.github.dev/api/health`
 
-Se quiser validar API rapidamente:
+### Testes rápidos
 
 ```sh
 curl -s http://127.0.0.1:7070/api/health
